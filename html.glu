@@ -1,0 +1,69 @@
+let prelude @ { (<>) } = import! std.prelude
+let string = import! std.string
+let list @ { List } = import! std.list
+let io = import! std.io
+
+type Style = (String, String)
+
+
+type Attribute = (String, String)
+
+
+type Html =
+    | Node String (List Style) (List Attribute) (List Html)
+    | Text String
+    | Empty
+
+
+let node tagName attributes children : String -> Array Attribute -> Array Html -> Html =
+    Node tagName Nil (list.of attributes) (list.of children)
+
+
+let renderNode n : Html -> String =
+    let renderChildren children : List Html -> String =
+        match children with
+            | Nil -> ""
+            | Cons hd xs -> renderNode hd <> renderChildren xs
+    in
+    match n with 
+        | Node tagName styles attributes Nil ->
+            "<" <> tagName <> "/>"
+
+        | Node tagName styles attributes children ->
+            "<" <> tagName <> ">" <> renderChildren children <> "</" <> tagName <> ">"
+
+        | Text str ->
+            str
+
+
+
+// type Page =
+//     {
+//         title : String,
+//         stylesheets : Array String,
+//         scripts : Array String,
+//         meta : Array (String, Array String),
+//         body : Array Html,
+//     }
+
+
+// ? <!DOCTYPE html>
+// let renderPage p : Page -> Html =
+//     node "html" []
+//         [
+//             node "head" []
+//                 [
+//                     node "meta" [ ("charset", "utf-8") ] [],
+//                     node "title" [] [ Text p.title ],
+//                 ],
+//             node "body" [] p.body
+//         ]
+
+
+{
+    Style,
+    Attribute,
+    Html,
+    node,
+    renderNode,
+}
